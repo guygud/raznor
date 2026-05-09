@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Беларусь 2026</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1a1d27" />
   <style>
-    :root {
+    /* ── Themes ── */
+    :root, [data-theme="dark"] {
       --bg: #0f1117;
       --surface: #1a1d27;
       --surface2: #22263a;
@@ -19,7 +22,27 @@
       --text: #e8eaf0;
       --text2: #8b93b0;
       --r: 14px;
+      --header-bg: linear-gradient(135deg, #1a1d27, #1e2540);
+      --visited-opacity: 0.38;
     }
+    [data-theme="light"] {
+      --bg: #f0f2f8;
+      --surface: #ffffff;
+      --surface2: #e8eaf4;
+      --border: #d0d4e8;
+      --accent: #2563eb;
+      --accent2: #7c3aed;
+      --gold: #d97706;
+      --green: #16a34a;
+      --red: #dc2626;
+      --orange: #ea580c;
+      --text: #1a1d2e;
+      --text2: #5a6080;
+      --r: 14px;
+      --header-bg: linear-gradient(135deg, #ffffff, #eef0fa);
+      --visited-opacity: 0.32;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: var(--bg);
@@ -27,26 +50,37 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 15px;
       line-height: 1.6;
+      transition: background .25s, color .25s;
     }
 
     /* ── Header ── */
     .header {
-      background: linear-gradient(135deg, #1a1d27, #1e2540);
+      background: var(--header-bg);
       border-bottom: 1px solid var(--border);
-      padding: 18px 16px 14px;
+      padding: 16px 16px 12px;
       position: sticky;
       top: 0;
       z-index: 100;
     }
-    .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .header-top h1 { font-size: 18px; font-weight: 700; }
-    .header-top p  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .header-top {
+      display: flex; align-items: center;
+      gap: 10px; margin-bottom: 10px;
+    }
+    .header-top h1 { font-size: 17px; font-weight: 700; flex: 1; }
+    .header-top p  { font-size: 11px; color: var(--text2); margin-top: 1px; }
+    .theme-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 9px; cursor: pointer;
+      font-size: 15px; line-height: 1; flex-shrink: 0;
+      transition: background .2s;
+    }
+    .theme-btn:hover { background: var(--border); }
 
     /* Route strip */
     .route-strip {
       display: flex; align-items: center;
       overflow-x: auto; scrollbar-width: none;
-      padding-bottom: 12px;
+      padding-bottom: 10px;
     }
     .route-strip::-webkit-scrollbar { display: none; }
     .route-city { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
@@ -77,6 +111,8 @@
     .tab:hover { border-color: var(--accent); color: var(--text); }
     .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
     .tab.info.active { background: var(--accent2); border-color: var(--accent2); }
+    .tab.today-tab { border-color: var(--green); }
+    .tab.today-tab.active { background: var(--green); border-color: var(--green); }
 
     /* ── Panels ── */
     main { padding: 14px 16px 40px; max-width: 640px; margin: 0 auto; }
@@ -84,9 +120,9 @@
     .panel.active { display: block; }
     @keyframes up { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; } }
 
-    /* Day header card */
+    /* Day header */
     .day-head {
-      background: linear-gradient(135deg, var(--surface), var(--surface2));
+      background: var(--header-bg);
       border: 1px solid var(--border); border-radius: var(--r);
       padding: 15px; margin-bottom: 12px;
     }
@@ -97,6 +133,7 @@
       padding: 3px 9px; border-radius: 20px;
       letter-spacing: .5px; white-space: nowrap;
     }
+    .day-badge.today { background: var(--green); }
     .day-date  { font-size: 16px; font-weight: 700; }
     .day-city  { font-size: 13px; font-weight: 600; color: var(--accent); margin-top: 2px; }
     .day-theme { font-size: 12px; color: var(--text2); font-style: italic; margin-top: 3px; }
@@ -104,9 +141,8 @@
       display: flex; gap: 8px; align-items: flex-start;
       background: var(--surface2); border: 1px solid var(--border);
       border-radius: 10px; padding: 9px 12px;
-      margin-top: 10px; font-size: 13px; color: var(--text2);
+      margin-top: 8px; font-size: 13px; color: var(--text2);
     }
-    .transport + .transport { margin-top: 6px; }
 
     /* Warning */
     .warn-box {
@@ -116,19 +152,31 @@
     }
     .warn-box ul { padding-left: 16px; }
     .warn-box li { margin-top: 3px; }
+    .warn-box a { color: #fdd09a; }
 
-    /* Section title */
+    /* Section + filter row */
     .sec { font-size: 12px; font-weight: 700; color: var(--text2);
            text-transform: uppercase; letter-spacing: .8px;
            margin: 16px 0 9px; }
+    .filter-row { display: flex; gap: 6px; margin-bottom: 10px; }
+    .filter-btn {
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 5px 12px;
+      font-size: 12px; font-weight: 600; color: var(--text2);
+      cursor: pointer; transition: all .18s;
+    }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
     /* Cards */
     .card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--r); margin-bottom: 9px; overflow: hidden;
-      transition: border-color .18s;
+      transition: border-color .18s, opacity .25s;
     }
-    .card:hover { border-color: #3a4165; }
+    .card:hover { border-color: var(--accent2); }
+    .card.hidden { display: none; }
+    .card.visited { opacity: var(--visited-opacity); }
+    .card.visited .card-name { text-decoration: line-through; }
     .card-head {
       display: flex; justify-content: space-between; align-items: flex-start;
       padding: 12px 13px 10px; gap: 10px;
@@ -147,6 +195,8 @@
     .b-bfast  { background: rgba(250,204,21,.13); color: #fcd34d;      border: 1px solid rgba(250,204,21,.28); }
     .b-book   { background: rgba(124,92,191,.16); color: #b08af0;      border: 1px solid rgba(124,92,191,.32); }
     .b-closed { background: rgba(239,68,68,.13);  color: #fca5a5;      border: 1px solid rgba(239,68,68,.3);   }
+    .b-open   { background: rgba(34,197,94,.15);  color: #4ade80;      border: 1px solid rgba(34,197,94,.35);  }
+    .b-shut   { background: rgba(239,68,68,.13);  color: #fca5a5;      border: 1px solid rgba(239,68,68,.3);   }
     .chevron  { color: var(--text2); font-size: 13px; transition: transform .18s; flex-shrink: 0; }
     .card.open .chevron { transform: rotate(180deg); }
 
@@ -155,7 +205,7 @@
       border-top: 1px solid var(--border);
     }
     .card.open .card-body { display: block; }
-    .card-desc { font-size: 13px; color: #aab0cc; margin-top: 10px; line-height: 1.55; }
+    .card-desc { font-size: 13px; color: var(--text2); margin-top: 10px; line-height: 1.55; opacity: .85; }
 
     .meta { margin-top: 9px; display: flex; flex-direction: column; gap: 5px; }
     .meta-row { display: flex; gap: 8px; font-size: 12px; color: var(--text2); align-items: flex-start; }
@@ -165,16 +215,21 @@
 
     .rating { display: flex; align-items: center; gap: 3px; font-size: 13px; font-weight: 700; color: var(--gold); }
 
-    /* Maps button */
+    /* Maps buttons */
     .maps-btn {
       display: inline-flex; align-items: center; gap: 5px;
-      background: rgba(79,142,247,.13); border: 1px solid rgba(79,142,247,.3);
-      color: #8ab4f8; border-radius: 8px;
+      background: rgba(79,142,247,.1); border: 1px solid rgba(79,142,247,.28);
+      color: var(--accent); border-radius: 8px;
       padding: 5px 11px; font-size: 12px; font-weight: 600;
-      text-decoration: none; margin-top: 10px;
-      transition: background .18s;
+      text-decoration: none; transition: background .18s;
     }
-    .maps-btn:hover { background: rgba(79,142,247,.22); }
+    .maps-btn:hover { background: rgba(79,142,247,.2); }
+
+    /* Visited hint */
+    .visited-hint {
+      font-size: 10px; color: var(--text2); text-align: center;
+      margin-top: 4px; opacity: .5;
+    }
 
     /* Practical tab */
     .info-card {
@@ -188,12 +243,14 @@
     }
     .info-row:last-child { border-bottom: none; padding-bottom: 0; }
     .info-row .lbl { font-weight: 600; color: var(--text); min-width: 110px; flex-shrink: 0; }
+    .info-row a { color: var(--accent); text-decoration: none; }
     .warn-li {
       display: flex; gap: 9px; align-items: flex-start;
       font-size: 13px; color: #fbb56a;
       padding: 7px 0; border-bottom: 1px solid var(--border);
     }
     .warn-li:last-child { border-bottom: none; }
+    .warn-li a { color: #fdd09a; }
     .note-li {
       display: flex; gap: 9px; font-size: 13px; color: var(--text2);
       padding: 5px 0;
@@ -205,16 +262,15 @@
       display: flex; align-items: center; justify-content: center;
       height: 60vh; font-size: 15px; color: var(--text2);
     }
-
     footer { text-align: center; padding: 10px 16px 30px; color: var(--text2); font-size: 12px; }
 
     /* Schedule timeline */
-    .timeline { margin-top: 4px; display: flex; flex-direction: column; gap: 0; }
+    .timeline { margin-top: 4px; display: flex; flex-direction: column; }
     .tl-item { display: flex; gap: 12px; align-items: flex-start; }
-    .tl-left { display: flex; flex-direction: column; align-items: center; width: 52px; flex-shrink: 0; }
+    .tl-left { display: flex; flex-direction: column; align-items: center; width: 56px; flex-shrink: 0; }
     .tl-time { font-size: 11px; font-weight: 700; color: var(--accent); white-space: nowrap; }
     .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin: 4px 0 0; flex-shrink: 0; }
-    .tl-line { width: 2px; flex: 1; background: var(--border); min-height: 16px; }
+    .tl-line { width: 2px; flex: 1; background: var(--border); min-height: 14px; }
     .tl-item:last-child .tl-line { display: none; }
     .tl-event { font-size: 13px; color: var(--text2); padding: 2px 0 14px; }
   </style>
@@ -226,11 +282,140 @@
 </div>
 
 <script>
-const DAY_EMOJIS = ['🏙️','🏰','🏛️','⛪'];
-const CITY_EMOJIS = { 'Минск':'🏙️', 'Несвиж + Мирский замок':'🏰', 'Брест':'🏛️', 'Гродно':'⛪' };
+/* ═══════════════════════════════════════════════
+   THEME
+═══════════════════════════════════════════════ */
+(function () {
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+
+/* ═══════════════════════════════════════════════
+   VISITED STATE
+═══════════════════════════════════════════════ */
+const visited = new Set(JSON.parse(localStorage.getItem('visited') || '[]'));
+
+function saveVisited() {
+  localStorage.setItem('visited', JSON.stringify([...visited]));
+}
+
+function toggleVisited(card) {
+  const id = card.dataset.vid;
+  if (!id) return;
+  if (visited.has(id)) {
+    visited.delete(id);
+    card.classList.remove('visited');
+  } else {
+    visited.add(id);
+    card.classList.add('visited');
+  }
+  saveVisited();
+}
+
+/* Double-tap detection */
+const lastTap = {};
+function handleCardTap(e, card) {
+  const id = card.dataset.vid;
+  const now = Date.now();
+  if (lastTap[id] && now - lastTap[id] < 350) {
+    e.preventDefault();
+    toggleVisited(card);
+    lastTap[id] = 0;
+  } else {
+    lastTap[id] = now;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   OPEN NOW
+═══════════════════════════════════════════════ */
+const RU_DAYS = { 'пн': 1, 'вт': 2, 'ср': 3, 'чт': 4, 'пт': 5, 'сб': 6, 'вс': 0 };
+
+function parseTime(s) {
+  const m = s.trim().match(/(\d{1,2}):(\d{2})/);
+  return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : null;
+}
+
+function expandDayRange(from, to) {
+  // expand e.g. пн–пт → [1,2,3,4,5]
+  const days = [1,2,3,4,5,6,0];
+  const fi = days.indexOf(RU_DAYS[from]);
+  const ti = days.indexOf(RU_DAYS[to]);
+  if (fi === -1 || ti === -1) return null;
+  if (fi <= ti) return days.slice(fi, ti + 1);
+  return [...days.slice(fi), ...days.slice(0, ti + 1)];
+}
+
+function isOpenNow(hours) {
+  if (!hours) return null;
+  const h = hours.toLowerCase().trim();
+
+  if (h.includes('круглосуточно')) return true;
+
+  const now = new Date();
+  const todayMin = now.getHours() * 60 + now.getMinutes();
+  const todayDow = now.getDay(); // 0=Sun
+
+  // Check "выходной — X" or "выходной — X, Y"
+  const closedMatch = h.match(/выходной[^:]*[—-]\s*(.+)/);
+  if (closedMatch) {
+    const closedDays = closedMatch[1].split(/[,\s]+/).map(d => d.trim().slice(0,2)).filter(d => RU_DAYS[d] !== undefined);
+    if (closedDays.some(d => RU_DAYS[d] === todayDow)) return false;
+  }
+
+  // Split by comma to handle "пн–пт X–Y, сб–вс X–Y"
+  const segments = h.split(/,\s*/);
+  for (const seg of segments) {
+    // Match: [dayrange] HH:MM–HH:MM
+    const m = seg.match(/(?:([а-я]{2})(?:[–-]([а-я]{2}))?\s+)?(\d{1,2}:\d{2})[–-](\d{1,2}:\d{2})/);
+    if (!m) continue;
+
+    const [, d1, d2, tFrom, tTo] = m;
+    const open = parseTime(tFrom);
+    let close = parseTime(tTo);
+    if (open === null || close === null) continue;
+
+    // Handle midnight crossover (e.g., 12:00–02:00)
+    if (close < open) close += 24 * 60;
+
+    // Check day applicability
+    if (d1) {
+      const allowedDays = d2 ? expandDayRange(d1, d2) : [RU_DAYS[d1]];
+      if (!allowedDays || !allowedDays.includes(todayDow)) continue;
+    }
+
+    const effectiveNow = (close < open && todayMin < open) ? todayMin + 24 * 60 : todayMin;
+    if (effectiveNow >= open && effectiveNow < close) return true;
+  }
+
+  // If we had time segments but none matched → closed
+  if (h.match(/\d{1,2}:\d{2}/)) return false;
+  return null; // unknown
+}
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+const DAY_EMOJIS = ['🌿', '🏰', '🏛️', '🏙️'];
 
 function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function linkifyPhones(text) {
+  // Match Belarusian/RU phone numbers
+  return esc(text).replace(/(\+375[\s\d()–-]{9,20})/g, m => {
+    const digits = m.replace(/\D/g, '');
+    return `<a href="tel:+${digits}">${m}</a>`;
+  });
 }
 
 function badge(cls, text) {
@@ -239,9 +424,14 @@ function badge(cls, text) {
 
 function priceBadge(price) {
   if (!price) return '';
-  const p = price.toLowerCase();
-  if (p === 'бесплатно') return badge('b-free', 'бесплатно');
-  return badge('b-price', esc(price));
+  return price.toLowerCase() === 'бесплатно' ? badge('b-free', 'бесплатно') : badge('b-price', esc(price));
+}
+
+function openBadge(hours) {
+  const state = isOpenNow(hours);
+  if (state === true)  return badge('b-open', '● открыто');
+  if (state === false) return badge('b-shut', '● закрыто');
+  return '';
 }
 
 function renderMeta(rows) {
@@ -257,7 +447,7 @@ function mapsBtn(geo) {
   if (!geo) return '';
   const google = `https://maps.google.com/?q=${geo.lat},${geo.lng}`;
   const yandex = `https://yandex.ru/maps/?pt=${geo.lng},${geo.lat}&z=17`;
-  return `<div style="display:flex;gap:7px;margin-top:10px">
+  return `<div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
     <a class="maps-btn" href="${google}" target="_blank">🗺️ Google</a>
     <a class="maps-btn" href="${yandex}" target="_blank">🗺️ Яндекс</a>
   </div>`;
@@ -265,21 +455,26 @@ function mapsBtn(geo) {
 
 function renderWarnings(warnings) {
   if (!warnings?.length) return '';
-  return `<div class="warn-box"><ul>${warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>`;
+  const items = warnings.map(w => `<li>${linkifyPhones(w)}</li>`).join('');
+  return `<div class="warn-box"><ul>${items}</ul></div>`;
 }
 
-function renderSight(s) {
-  const isFree = (s.price ?? '').toLowerCase() === 'бесплатно';
+/* ═══════════════════════════════════════════════
+   SIGHT CARD
+═══════════════════════════════════════════════ */
+function renderSight(s, dayIdx) {
+  const vid = `s-${dayIdx}-${s.name}`;
+  const isV = visited.has(vid);
   return `
-  <div class="card" onclick="toggle(this)">
+  <div class="card${isV ? ' visited' : ''}" data-vid="${esc(vid)}" ontouchstart="handleCardTap(event, this)" onclick="toggle(this)">
     <div class="card-head">
       <div>
         <div class="card-name">${esc(s.name)}</div>
         <div class="card-sub">${esc(s.type)}</div>
       </div>
       <div class="badges">
-        ${s.must_see ? badge('b-must','⭐ маст-си') : ''}
-        ${s.warning ? badge('b-closed','⚠️ закрыто') : ''}
+        ${s.must_see ? badge('b-must', '⭐ маст-си') : ''}
+        ${s.warning ? badge('b-closed', '⚠️ закрыто') : ''}
         ${priceBadge(s.price)}
         <span class="chevron">▾</span>
       </div>
@@ -287,30 +482,36 @@ function renderSight(s) {
     <div class="card-body">
       <div class="card-desc">${esc(s.description)}</div>
       ${renderMeta([
-        metaRow('🕐', s.hours),
-        metaRow('📍', s.address),
-        metaRow('💰', s.price),
-        s.booking_tip ? metaRow('💡', s.booking_tip) : '',
-        s.warning    ? `<div class="meta-row"><span class="ic">⚠️</span><span style="color:#fca5a5">${esc(s.warning)}</span></div>` : '',
-        s.url        ? metaRow('🔗', `<a href="${esc(s.url)}" target="_blank">${esc(s.url.replace(/https?:\/\//,''))}</a>`) : '',
+        metaRow('🕐', s.hours ? `${esc(s.hours)} ${openBadge(s.hours)}` : ''),
+        metaRow('📍', esc(s.address)),
+        metaRow('💰', esc(s.price)),
+        s.booking_tip ? metaRow('💡', esc(s.booking_tip)) : '',
+        s.warning ? `<div class="meta-row"><span class="ic">⚠️</span><span style="color:#fca5a5">${esc(s.warning)}</span></div>` : '',
+        s.url ? metaRow('🔗', `<a href="${esc(s.url)}" target="_blank">${esc(s.url.replace(/https?:\/\//, ''))}</a>`) : '',
       ])}
       ${mapsBtn(s.geo)}
+      <div class="visited-hint">двойной тап = отметить посещённым</div>
     </div>
   </div>`;
 }
 
-function renderRestaurant(r) {
+/* ═══════════════════════════════════════════════
+   RESTAURANT CARD
+═══════════════════════════════════════════════ */
+function renderRestaurant(r, dayIdx) {
+  const vid = `r-${dayIdx}-${r.name}`;
+  const isV = visited.has(vid);
   const ratingHtml = r.rating ? `<div class="rating">★ ${r.rating}</div>` : '';
   return `
-  <div class="card" onclick="toggle(this)">
+  <div class="card${isV ? ' visited' : ''}" data-breakfast="${r.is_breakfast ? '1' : '0'}" data-vid="${esc(vid)}" ontouchstart="handleCardTap(event, this)" onclick="toggle(this)">
     <div class="card-head">
       <div>
         <div class="card-name">${esc(r.name)}</div>
         <div class="card-sub">${esc(r.type)}</div>
       </div>
       <div class="badges">
-        ${r.is_breakfast ? badge('b-bfast','☀️ завтрак') : ''}
-        ${r.booking ? badge('b-book','📋 бронь') : ''}
+        ${r.is_breakfast ? badge('b-bfast', '☀️ завтрак') : ''}
+        ${r.booking ? badge('b-book', '📋 бронь') : ''}
         ${ratingHtml}
         <span class="chevron">▾</span>
       </div>
@@ -318,16 +519,34 @@ function renderRestaurant(r) {
     <div class="card-body">
       <div class="card-desc">${esc(r.description)}</div>
       ${renderMeta([
-        metaRow('🕐', r.hours),
-        metaRow('📍', r.address),
-        metaRow('💰', r.price_range),
-        r.url ? metaRow('🔗', `<a href="${esc(r.url)}" target="_blank">${esc(r.url.replace(/https?:\/\//,''))}</a>`) : '',
+        metaRow('🕐', r.hours ? `${esc(r.hours)} ${openBadge(r.hours)}` : ''),
+        metaRow('📍', esc(r.address)),
+        metaRow('💰', esc(r.price_range)),
+        r.url ? metaRow('🔗', `<a href="${esc(r.url)}" target="_blank">${esc(r.url.replace(/https?:\/\//, ''))}</a>`) : '',
       ])}
       ${mapsBtn(r.geo)}
+      <div class="visited-hint">двойной тап = отметить посещённым</div>
     </div>
   </div>`;
 }
 
+/* ═══════════════════════════════════════════════
+   FILTER
+═══════════════════════════════════════════════ */
+function filterRestaurants(btn, filter) {
+  const panel = btn.closest('.panel');
+  panel.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  panel.querySelectorAll('.card[data-breakfast]').forEach(card => {
+    if (filter === 'all') card.classList.remove('hidden');
+    else if (filter === 'bfast') card.classList.toggle('hidden', card.dataset.breakfast !== '1');
+    else card.classList.toggle('hidden', card.dataset.breakfast === '1');
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   SCHEDULE TIMELINE
+═══════════════════════════════════════════════ */
 function renderSchedule(schedule) {
   if (!schedule?.length) return '';
   return `
@@ -347,7 +566,10 @@ function renderSchedule(schedule) {
   </div>`;
 }
 
-function renderDay(day, idx) {
+/* ═══════════════════════════════════════════════
+   DAY PANEL
+═══════════════════════════════════════════════ */
+function renderDay(day, idx, isToday) {
   const emoji = DAY_EMOJIS[idx] ?? '📍';
   const transportLines = [
     day.transport_in  ? `<div class="transport"><span>🚆</span><span>${esc(day.transport_in)}</span></div>` : '',
@@ -355,6 +577,13 @@ function renderDay(day, idx) {
     day.transport_out ? `<div class="transport"><span>🏠</span><span>${esc(day.transport_out)}</span></div>` : '',
     day.transport_tip ? `<div class="transport"><span>💡</span><span>${esc(day.transport_tip)}</span></div>` : '',
   ].filter(Boolean).join('');
+
+  const filterBar = `
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterRestaurants(this,'all')">Все</button>
+      <button class="filter-btn" onclick="filterRestaurants(this,'bfast')">☀️ Завтрак</button>
+      <button class="filter-btn" onclick="filterRestaurants(this,'dinner')">🌙 Ужин</button>
+    </div>`;
 
   return `
   <div class="day-head">
@@ -364,24 +593,45 @@ function renderDay(day, idx) {
         <div class="day-city">${emoji} ${esc(day.city)}</div>
         <div class="day-theme">${esc(day.theme)}</div>
       </div>
-      <div class="day-badge">ДЕНЬ ${day.day}</div>
+      <div class="day-badge${isToday ? ' today' : ''}">ДЕНЬ ${day.day}${isToday ? ' · сегодня' : ''}</div>
     </div>
     ${transportLines}
   </div>
   ${renderWarnings(day.day_warnings)}
   ${renderSchedule(day.schedule)}
   <div class="sec">⭐ Достопримечательности</div>
-  ${(day.sights ?? []).map(renderSight).join('')}
+  ${(day.sights ?? []).map(s => renderSight(s, idx)).join('')}
   <div class="sec">🍽️ Рестораны и кафе</div>
-  ${(day.restaurants ?? []).map(renderRestaurant).join('')}`;
+  ${filterBar}
+  ${(day.restaurants ?? []).map(r => renderRestaurant(r, idx)).join('')}`;
 }
 
+/* ═══════════════════════════════════════════════
+   PRACTICAL TAB
+═══════════════════════════════════════════════ */
 function renderPractical(data) {
   const p = data.practical;
   const t = p.transport;
   const calRows = Object.entries(p.calendar ?? {}).map(([k, v]) => {
     const date = k.replace('_may', ' мая').replace('_', ' ');
     return `<div class="info-row"><span class="lbl">${date.trim()}</span><span>${esc(v)}</span></div>`;
+  }).join('');
+
+  const transportRows = Object.entries(t).map(([k, v]) => {
+    const label = k
+      .replace('minsk_to_sula',    'Минск → Сула')
+      .replace('minsk_to_grodno',  'Минск → Гродно')
+      .replace('grodno_to_brest',  'Гродно → Брест')
+      .replace('brest_to_minsk',   'Брест → Минск')
+      .replace('minsk_to_moscow',  'Минск → Москва')
+      .replace('minsk_to_brest',   'Минск → Брест')
+      .replace('brest_to_grodno',  'Брест → Гродно')
+      .replace('grodno_to_moscow', 'Гродно → Москва')
+      .replace(/_/g, ' → ');
+    const val = v.includes('rw.by')
+      ? esc(v).replace('rw.by', '<a href="https://rw.by" target="_blank">rw.by</a>')
+      : linkifyPhones(v);
+    return `<div class="info-row"><span class="lbl">${label}</span><span>${val}</span></div>`;
   }).join('');
 
   return `
@@ -391,31 +641,14 @@ function renderPractical(data) {
     <div class="info-row"><span class="lbl">Карты</span><span>${esc(p.currency_note)}</span></div>
   </div>
   <div class="info-card">
-    <h3>🚆 Транспорт</h3>
-    ${Object.entries(t).map(([k, v]) => {
-      const label = k
-        .replace('minsk_to_sula',    'Минск → Сула')
-        .replace('minsk_to_grodno',  'Минск → Гродно')
-        .replace('grodno_to_brest',  'Гродно → Брест')
-        .replace('brest_to_minsk',   'Брест → Минск')
-        .replace('minsk_to_moscow',  'Минск → Москва')
-        .replace('minsk_to_brest',   'Минск → Брест')
-        .replace('brest_to_grodno',  'Брест → Гродно')
-        .replace('grodno_to_moscow', 'Гродно → Москва')
-        .replace(/_/g, ' → ');
-      const val = v.includes('rw.by')
-        ? v.replace('rw.by', '<a href="https://rw.by" target="_blank" style="color:var(--accent)">rw.by</a>')
-        : esc(v);
-      return `<div class="info-row"><span class="lbl">${label}</span><span>${val}</span></div>`;
-    }).join('')}
+    <h3>🚆 Транспорт</h3>${transportRows}
   </div>
   <div class="info-card">
     <h3>⚠️ Важные предупреждения</h3>
-    ${(p.warnings ?? []).map(w => `<div class="warn-li"><span>⚠️</span><span>${esc(w)}</span></div>`).join('')}
+    ${(p.warnings ?? []).map(w => `<div class="warn-li"><span>⚠️</span><span>${linkifyPhones(w)}</span></div>`).join('')}
   </div>
   <div class="info-card">
-    <h3>📅 Даты</h3>
-    ${calRows}
+    <h3>📅 Даты</h3>${calRows}
   </div>
   <div class="info-card">
     <h3>📝 Заметки</h3>
@@ -423,67 +656,134 @@ function renderPractical(data) {
   </div>`;
 }
 
+/* ═══════════════════════════════════════════════
+   ROUTE STRIP
+═══════════════════════════════════════════════ */
 function renderRoute(days) {
   const cities = days.map(d => d.city.split(' + ')[0].split(' ')[0]);
   return cities.map((c, i) => `
-    <div class="route-city">
-      <div class="route-dot"></div>
-      <div class="route-name">${esc(c)}</div>
-    </div>
-    ${i < cities.length - 1 ? '<div class="route-line"></div>' : '<div class="route-line"></div>'}
+    <div class="route-city"><div class="route-dot"></div><div class="route-name">${esc(c)}</div></div>
+    <div class="route-line"></div>
   `).join('') + `
-  <div class="route-city">
-    <div class="route-dot end"></div>
-    <div class="route-name">🏠 Москва</div>
-  </div>`;
+  <div class="route-city"><div class="route-dot end"></div><div class="route-name">🏠 Москва</div></div>`;
 }
 
-function buildTabs(days) {
+/* ═══════════════════════════════════════════════
+   AUTO-SELECT TODAY
+═══════════════════════════════════════════════ */
+const RU_MONTHS = { 'января':0,'февраля':1,'марта':2,'апреля':3,'мая':4,'июня':5,'июля':6,'августа':7,'сентября':8,'октября':9,'ноября':10,'декабря':11 };
+
+function findTodayIdx(days) {
+  const now = new Date();
+  const yr = now.getFullYear();
+  for (let i = 0; i < days.length; i++) {
+    const m = days[i].date.match(/(\d+)\s+([а-яё]+)/i);
+    if (!m) continue;
+    const d = parseInt(m[1]);
+    const mo = RU_MONTHS[m[2].toLowerCase()];
+    if (mo === undefined) continue;
+    const tripDate = new Date(yr, mo, d);
+    if (tripDate.toDateString() === now.toDateString()) return i;
+  }
+  return -1;
+}
+
+/* ═══════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════ */
+function buildTabs(days, todayIdx) {
   return days.map((d, i) => {
     const cityShort = d.city.split(' ')[0];
     const dateShort = d.date.split(',')[0];
-    return `<button class="tab${i===0?' active':''}" onclick="showPanel('day${i}', this)">${dateShort} · ${cityShort}</button>`;
+    const isToday = i === todayIdx;
+    return `<button class="tab${i === (todayIdx >= 0 ? todayIdx : 0) ? ' active' : ''}${isToday ? ' today-tab' : ''}" onclick="showPanel('day${i}', this)">${dateShort} · ${cityShort}${isToday ? ' 📍' : ''}</button>`;
   }).join('') + `<button class="tab info" onclick="showPanel('info', this)">ℹ️ Инфо</button>`;
 }
 
+/* ═══════════════════════════════════════════════
+   SWIPE
+═══════════════════════════════════════════════ */
+let swipeX0 = null;
+let currentDayIdx = 0;
+let totalDays = 0;
+
+function initSwipe(mainEl) {
+  mainEl.addEventListener('touchstart', e => {
+    swipeX0 = e.touches[0].clientX;
+  }, { passive: true });
+  mainEl.addEventListener('touchend', e => {
+    if (swipeX0 === null) return;
+    const dx = e.changedTouches[0].clientX - swipeX0;
+    swipeX0 = null;
+    if (Math.abs(dx) < 60) return;
+    const next = dx < 0 ? currentDayIdx + 1 : currentDayIdx - 1;
+    if (next < 0 || next >= totalDays) return;
+    const btn = document.querySelector(`.tab:nth-child(${next + 1})`);
+    if (btn) showPanel(`day${next}`, btn);
+  }, { passive: true });
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════ */
 function render(data) {
   const days = data.days;
+  totalDays = days.length;
+  const todayIdx = findTodayIdx(days);
+  const activeStart = todayIdx >= 0 ? todayIdx : 0;
+  currentDayIdx = activeStart;
 
   const panels = days.map((d, i) => `
-    <div id="day${i}" class="panel${i===0?' active':''}">
-      ${renderDay(d, i)}
+    <div id="day${i}" class="panel${i === activeStart ? ' active' : ''}">
+      ${renderDay(d, i, i === todayIdx)}
     </div>
   `).join('') + `
-  <div id="info" class="panel">
-    ${renderPractical(data)}
-  </div>`;
+  <div id="info" class="panel">${renderPractical(data)}</div>`;
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
   document.getElementById('app').innerHTML = `
   <header class="header">
     <div class="header-top">
-      <span style="font-size:28px">🇧🇾</span>
-      <div>
+      <span style="font-size:26px">🇧🇾</span>
+      <div style="flex:1">
         <h1>${esc(data.trip.title)}</h1>
         <p>${esc(data.trip.description)}</p>
       </div>
+      <button class="theme-btn" onclick="toggleTheme()" id="theme-icon">${isDark ? '☀️' : '🌙'}</button>
     </div>
     <div class="route-strip">${renderRoute(days)}</div>
-    <div class="tabs">${buildTabs(days)}</div>
+    <div class="tabs">${buildTabs(days, todayIdx)}</div>
   </header>
-  <main>${panels}</main>
+  <main id="main">${panels}</main>
   <footer>${esc(data.trip.dates)}</footer>`;
+
+  initSwipe(document.getElementById('main'));
 }
 
+/* ═══════════════════════════════════════════════
+   PANEL NAVIGATION
+═══════════════════════════════════════════════ */
 function showPanel(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
+  const dayMatch = id.match(/^day(\d+)$/);
+  if (dayMatch) currentDayIdx = parseInt(dayMatch[1]);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function toggle(card) {
+  // Prevent toggle if this was a double-tap for visited
   card.classList.toggle('open');
+}
+
+/* ═══════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 fetch('data.json')
@@ -494,7 +794,7 @@ fetch('data.json')
       `<div class="loading" style="flex-direction:column;gap:8px">
         <span style="font-size:32px">⚠️</span>
         <span>Не удалось загрузить data.json</span>
-        <span style="font-size:12px;color:var(--text2)">${esc(e.message)}</span>
+        <span style="font-size:12px;color:var(--text2)">${String(e.message)}</span>
       </div>`;
   });
 </script>
