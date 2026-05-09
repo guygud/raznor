@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Беларусь 10–13 мая 2026</title>
+  <title>Беларусь 2026</title>
   <style>
     :root {
       --bg: #0f1117;
@@ -18,8 +18,7 @@
       --orange: #f97316;
       --text: #e8eaf0;
       --text2: #8b93b0;
-      --radius: 14px;
-      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --r: 14px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -28,1361 +27,427 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 15px;
       line-height: 1.6;
-      min-height: 100vh;
     }
 
     /* ── Header ── */
     .header {
-      background: linear-gradient(135deg, #1a1d27 0%, #1e2540 100%);
+      background: linear-gradient(135deg, #1a1d27, #1e2540);
       border-bottom: 1px solid var(--border);
-      padding: 20px 16px 16px;
+      padding: 18px 16px 14px;
       position: sticky;
       top: 0;
       z-index: 100;
     }
-    .header-top {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
+    .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .header-top h1 { font-size: 18px; font-weight: 700; }
+    .header-top p  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+    /* Route strip */
+    .route-strip {
+      display: flex; align-items: center;
+      overflow-x: auto; scrollbar-width: none;
+      padding-bottom: 12px;
     }
-    .header-flag {
-      font-size: 28px;
-      line-height: 1;
+    .route-strip::-webkit-scrollbar { display: none; }
+    .route-city { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .route-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--accent); border: 2px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--accent);
     }
-    .header-title h1 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .header-title p {
-      font-size: 12px;
-      color: var(--text2);
-      margin-top: 2px;
+    .route-dot.end { background: var(--accent2); box-shadow: 0 0 0 2px var(--accent2); }
+    .route-name { font-size: 10px; font-weight: 600; color: var(--text2); margin-top: 4px; white-space: nowrap; }
+    .route-line {
+      flex: 1; min-width: 20px; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      margin-bottom: 16px; flex-shrink: 0;
     }
 
-    /* ── Day Tabs ── */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 2px;
-    }
+    /* Tabs */
+    .tabs { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; }
     .tabs::-webkit-scrollbar { display: none; }
-    .tab-btn {
+    .tab {
       flex-shrink: 0;
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 7px 14px;
-      cursor: pointer;
-      color: var(--text2);
-      font-size: 13px;
-      font-weight: 500;
-      transition: all 0.2s;
-      white-space: nowrap;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 7px 13px;
+      cursor: pointer; color: var(--text2);
+      font-size: 13px; font-weight: 500;
+      transition: all .2s; white-space: nowrap;
     }
-    .tab-btn:hover { border-color: var(--accent); color: var(--text); }
-    .tab-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-      font-weight: 600;
-    }
-    .tab-btn.info-tab.active {
-      background: var(--accent2);
-      border-color: var(--accent2);
-    }
+    .tab:hover { border-color: var(--accent); color: var(--text); }
+    .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .tab.info.active { background: var(--accent2); border-color: var(--accent2); }
 
-    /* ── Main Content ── */
-    main { padding: 16px; max-width: 640px; margin: 0 auto; }
+    /* ── Panels ── */
+    main { padding: 14px 16px 40px; max-width: 640px; margin: 0 auto; }
+    .panel { display: none; animation: up .22s ease; }
+    .panel.active { display: block; }
+    @keyframes up { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; } }
 
-    /* ── Day Panel ── */
-    .day-panel { display: none; }
-    .day-panel.active { display: block; animation: fadeIn 0.25s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    /* Day header card */
+    .day-head {
+      background: linear-gradient(135deg, var(--surface), var(--surface2));
+      border: 1px solid var(--border); border-radius: var(--r);
+      padding: 15px; margin-bottom: 12px;
+    }
+    .day-head-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .day-badge {
+      background: var(--accent); color: #fff;
+      font-size: 10px; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+      letter-spacing: .5px; white-space: nowrap;
+    }
+    .day-date  { font-size: 16px; font-weight: 700; }
+    .day-city  { font-size: 13px; font-weight: 600; color: var(--accent); margin-top: 2px; }
+    .day-theme { font-size: 12px; color: var(--text2); font-style: italic; margin-top: 3px; }
+    .transport {
+      display: flex; gap: 8px; align-items: flex-start;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 9px 12px;
+      margin-top: 10px; font-size: 13px; color: var(--text2);
+    }
+    .transport + .transport { margin-top: 6px; }
 
-    /* ── Day Header ── */
-    .day-header {
-      background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 14px;
+    /* Warning */
+    .warn-box {
+      background: rgba(249,115,22,.1); border: 1px solid rgba(249,115,22,.35);
+      border-radius: var(--r); padding: 11px 13px;
+      margin-bottom: 12px; font-size: 13px; color: #fbb56a;
     }
-    .day-header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .day-number {
-      background: var(--accent);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-      align-self: flex-start;
-    }
-    .day-date {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .day-city {
-      font-size: 13px;
-      color: var(--accent);
-      font-weight: 600;
-      margin-top: 2px;
-    }
-    .day-theme {
-      font-size: 12px;
-      color: var(--text2);
-      margin-top: 4px;
-      font-style: italic;
-    }
-    .transport-badge {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--text2);
-    }
-    .transport-badge .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .warn-box ul { padding-left: 16px; }
+    .warn-box li { margin-top: 3px; }
 
-    /* ── Warning ── */
-    .warning-box {
-      background: rgba(249, 115, 22, 0.12);
-      border: 1px solid rgba(249, 115, 22, 0.4);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      margin-bottom: 14px;
-      display: flex;
-      gap: 10px;
-      font-size: 13px;
-      color: #fbb56a;
-    }
-    .warning-box .icon { font-size: 18px; flex-shrink: 0; }
+    /* Section title */
+    .sec { font-size: 12px; font-weight: 700; color: var(--text2);
+           text-transform: uppercase; letter-spacing: .8px;
+           margin: 16px 0 9px; }
 
-    /* ── Section ── */
-    .section-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text2);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 10px;
-      margin-top: 18px;
-    }
-
-    /* ── Sight Card ── */
+    /* Cards */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 10px;
-      overflow: hidden;
-      transition: border-color 0.2s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); margin-bottom: 9px; overflow: hidden;
+      transition: border-color .18s;
     }
-    .card:hover { border-color: #3d4570; }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 13px 14px 10px;
-      gap: 10px;
-      cursor: pointer;
-      user-select: none;
+    .card:hover { border-color: #3a4165; }
+    .card-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 12px 13px 10px; gap: 10px;
+      cursor: pointer; user-select: none;
     }
-    .card-name {
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--text);
-    }
-    .card-type {
-      font-size: 11px;
-      color: var(--text2);
-      margin-top: 3px;
-    }
-    .card-badges {
-      display: flex;
-      gap: 5px;
-      flex-shrink: 0;
-      align-items: center;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
+    .card-name { font-weight: 600; font-size: 14px; }
+    .card-sub  { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .badges { display: flex; gap: 5px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
     .badge {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 3px 7px;
-      border-radius: 6px;
-      white-space: nowrap;
+      font-size: 10px; font-weight: 600;
+      padding: 2px 7px; border-radius: 6px; white-space: nowrap;
     }
-    .badge-must {
-      background: rgba(240, 180, 41, 0.2);
-      color: var(--gold);
-      border: 1px solid rgba(240, 180, 41, 0.35);
-    }
-    .badge-free {
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--green);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-    .badge-price {
-      background: rgba(79, 142, 247, 0.15);
-      color: #8ab4f8;
-      border: 1px solid rgba(79, 142, 247, 0.3);
-    }
-    .card-chevron {
-      color: var(--text2);
-      font-size: 14px;
-      transition: transform 0.2s;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .card.open .card-chevron { transform: rotate(180deg); }
+    .b-must   { background: rgba(240,180,41,.18); color: var(--gold);  border: 1px solid rgba(240,180,41,.35); }
+    .b-free   { background: rgba(34,197,94,.13);  color: var(--green); border: 1px solid rgba(34,197,94,.28); }
+    .b-price  { background: rgba(79,142,247,.13); color: #8ab4f8;      border: 1px solid rgba(79,142,247,.28); }
+    .b-bfast  { background: rgba(250,204,21,.13); color: #fcd34d;      border: 1px solid rgba(250,204,21,.28); }
+    .b-book   { background: rgba(124,92,191,.16); color: #b08af0;      border: 1px solid rgba(124,92,191,.32); }
+    .b-closed { background: rgba(239,68,68,.13);  color: #fca5a5;      border: 1px solid rgba(239,68,68,.3);   }
+    .chevron  { color: var(--text2); font-size: 13px; transition: transform .18s; flex-shrink: 0; }
+    .card.open .chevron { transform: rotate(180deg); }
+
     .card-body {
-      display: none;
-      padding: 0 14px 13px;
+      display: none; padding: 0 13px 12px;
       border-top: 1px solid var(--border);
     }
     .card.open .card-body { display: block; }
-    .card-desc {
-      font-size: 13px;
-      color: #b0b8d0;
-      margin-top: 10px;
-      line-height: 1.55;
-    }
-    .card-meta {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .meta-row {
-      display: flex;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text2);
-    }
-    .meta-row .mi { width: 16px; text-align: center; flex-shrink: 0; }
-    .meta-row a {
-      color: var(--accent);
-      text-decoration: none;
-    }
+    .card-desc { font-size: 13px; color: #aab0cc; margin-top: 10px; line-height: 1.55; }
+
+    .meta { margin-top: 9px; display: flex; flex-direction: column; gap: 5px; }
+    .meta-row { display: flex; gap: 8px; font-size: 12px; color: var(--text2); align-items: flex-start; }
+    .meta-row .ic { width: 16px; text-align: center; flex-shrink: 0; }
+    .meta-row a { color: var(--accent); text-decoration: none; }
     .meta-row a:hover { text-decoration: underline; }
 
-    /* ── Restaurant Card ── */
-    .rest-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
-    .rest-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 12px 14px 10px;
-      gap: 10px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .rest-name {
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--text);
-    }
-    .rest-type {
-      font-size: 11px;
-      color: var(--text2);
-      margin-top: 2px;
-    }
-    .rest-rating {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--gold);
-      flex-shrink: 0;
-    }
-    .rest-rating span { font-size: 14px; }
+    .rating { display: flex; align-items: center; gap: 3px; font-size: 13px; font-weight: 700; color: var(--gold); }
 
-    /* ── Practical Tab ── */
-    .info-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 12px;
+    /* Maps button */
+    .maps-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(79,142,247,.13); border: 1px solid rgba(79,142,247,.3);
+      color: #8ab4f8; border-radius: 8px;
+      padding: 5px 11px; font-size: 12px; font-weight: 600;
+      text-decoration: none; margin-top: 10px;
+      transition: background .18s;
     }
-    .info-section h3 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .maps-btn:hover { background: rgba(79,142,247,.22); }
+
+    /* Practical tab */
+    .info-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 15px; margin-bottom: 11px;
     }
+    .info-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 7px; }
     .info-row {
-      display: flex;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text2);
-      padding: 7px 0;
-      border-bottom: 1px solid var(--border);
+      display: flex; gap: 10px; font-size: 13px; color: var(--text2);
+      padding: 7px 0; border-bottom: 1px solid var(--border);
     }
     .info-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .info-row .label {
-      font-weight: 600;
-      color: var(--text);
-      min-width: 100px;
-      flex-shrink: 0;
+    .info-row .lbl { font-weight: 600; color: var(--text); min-width: 110px; flex-shrink: 0; }
+    .warn-li {
+      display: flex; gap: 9px; align-items: flex-start;
+      font-size: 13px; color: #fbb56a;
+      padding: 7px 0; border-bottom: 1px solid var(--border);
     }
-    .warn-item {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-      color: #fbb56a;
+    .warn-li:last-child { border-bottom: none; }
+    .note-li {
+      display: flex; gap: 9px; font-size: 13px; color: var(--text2);
+      padding: 5px 0;
     }
-    .warn-item:last-child { border-bottom: none; }
-    .warn-item .icon { flex-shrink: 0; }
-    .notes-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .note-item {
-      display: flex;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text2);
-      align-items: flex-start;
-    }
-    .note-item::before {
-      content: '•';
-      color: var(--accent);
-      font-size: 18px;
-      line-height: 1;
-      flex-shrink: 0;
+    .note-li::before { content: '•'; color: var(--accent); font-size: 18px; line-height: 1; flex-shrink: 0; }
+
+    /* Loading */
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      height: 60vh; font-size: 15px; color: var(--text2);
     }
 
-    /* ── Booking chip ── */
-    .booking-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(124, 92, 191, 0.18);
-      color: #b08af0;
-      border: 1px solid rgba(124, 92, 191, 0.35);
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 7px;
-    }
-
-    /* ── Route strip ── */
-    .route-strip {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      padding: 12px 16px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .route-strip::-webkit-scrollbar { display: none; }
-    .route-city {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .route-city-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 2px solid var(--bg);
-      box-shadow: 0 0 0 2px var(--accent);
-    }
-    .route-city-name {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text2);
-      margin-top: 5px;
-      white-space: nowrap;
-    }
-    .route-arrow {
-      flex: 1;
-      min-width: 24px;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      margin-bottom: 19px;
-      flex-shrink: 0;
-    }
-
-    /* ── Footer ── */
-    .footer {
-      text-align: center;
-      padding: 20px 16px 32px;
-      color: var(--text2);
-      font-size: 12px;
-    }
+    footer { text-align: center; padding: 10px 16px 30px; color: var(--text2); font-size: 12px; }
   </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="header-top">
-    <div class="header-flag">🇧🇾</div>
-    <div class="header-title">
-      <h1>Беларусь 2026</h1>
-      <p>10–13 мая · Минск → Несвиж/Мир → Брест → Гродно</p>
-    </div>
-  </div>
-
-  <!-- Route mini strip -->
-  <div class="route-strip">
-    <div class="route-city">
-      <div class="route-city-dot"></div>
-      <div class="route-city-name">Минск</div>
-    </div>
-    <div class="route-arrow"></div>
-    <div class="route-city">
-      <div class="route-city-dot"></div>
-      <div class="route-city-name">Мир/Несвиж</div>
-    </div>
-    <div class="route-arrow"></div>
-    <div class="route-city">
-      <div class="route-city-dot"></div>
-      <div class="route-city-name">Брест</div>
-    </div>
-    <div class="route-arrow"></div>
-    <div class="route-city">
-      <div class="route-city-dot"></div>
-      <div class="route-city-name">Гродно</div>
-    </div>
-    <div class="route-arrow" style="background: var(--accent2);"></div>
-    <div class="route-city">
-      <div class="route-city-dot" style="background: var(--accent2); box-shadow: 0 0 0 2px var(--accent2);"></div>
-      <div class="route-city-name">🏠 Москва</div>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab-btn active" onclick="showDay('day1')">10 мая · Минск</button>
-    <button class="tab-btn" onclick="showDay('day2')">11 мая · Замки</button>
-    <button class="tab-btn" onclick="showDay('day3')">12 мая · Брест</button>
-    <button class="tab-btn" onclick="showDay('day4')">13 мая · Гродно</button>
-    <button class="tab-btn info-tab" onclick="showDay('info')">ℹ️ Инфо</button>
-  </div>
-</header>
-
-<main>
-
-  <!-- ══════════════ DAY 1: MINSK ══════════════ -->
-  <div id="day1" class="day-panel active">
-    <div class="day-header">
-      <div class="day-header-top">
-        <div>
-          <div class="day-date">10 мая, суббота</div>
-          <div class="day-city">📍 Минск</div>
-          <div class="day-theme">Сталинский ампир, история, мемориалы</div>
-        </div>
-        <div class="day-number">ДЕНЬ 1</div>
-      </div>
-      <div class="transport-badge">
-        <span class="icon">🚆</span>
-        <span>Прибытие в Минск</span>
-      </div>
-    </div>
-
-    <div class="section-title">⭐ Достопримечательности</div>
-
-    <!-- Sights Day 1 -->
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Ворота Минска</div>
-          <div class="card-type">архитектура</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Две сталинские башни на привокзальной площади — символ города, построены в 1953 г.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>Круглосуточно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>Привокзальная площадь, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Бесплатно</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Площадь Независимости</div>
-          <div class="card-type">площадь / архитектура</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Одна из крупнейших площадей в Европе. Дом правительства, Красный костёл Св. Симеона и Елены, здание БГУ.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>Круглосуточно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>пл. Независимости, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Бесплатно</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Троицкое предместье</div>
-          <div class="card-type">исторический квартал</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Единственный сохранившийся исторический квартал Минска XVIII–XIX вв. Набережная Свислочи.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>Круглосуточно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Троицкая, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Бесплатно</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Остров Слёз</div>
-          <div class="card-type">мемориал</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Памятник белорусским воинам, погибшим в Афганистане (1979–1989). Часовня со скульптурами скорбящих ангелов.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>Круглосуточно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>Остров на р. Свислочь, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Бесплатно</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Площадь Победы</div>
-          <div class="card-type">мемориал</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Монумент Победы, вечный огонь. Рядом — церковь Александра Невского.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>Круглосуточно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>пл. Победы, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Бесплатно</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Национальная библиотека</div>
-          <div class="card-type">архитектура / смотровая</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-price">~5 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Здание-ромбокубооктаэдр. После 21:00 — световое шоу на фасаде. Смотровая площадка с панорамой города.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>пн–пт 9:00–21:00, сб–вс 10:00–21:00</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>пр. Независимости 116, ст. м. Восток</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Смотровая ~5 BYN</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Музей «Страна Мини»</div>
-          <div class="card-type">музей</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-price">~15–20 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Миниатюрные копии главных достопримечательностей Беларуси.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>вт–вс 10:00–19:00, пн — выходной</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>пр. Независимости 25, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>~15–20 BYN</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-title">🍽️ Рестораны</div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Раковский Бровар</div>
-          <div class="rest-type">пивной ресторан / белорусская кухня</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.5</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Культовый минский пивной ресторан с собственным пивоварением. Живая музыка, рёбра, драники.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>12:00–00:00 (пт–сб до 02:00)</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Витебская 10, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>80–100 BYN на человека</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="https://brovar.by" target="_blank">brovar.by</a></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Кухмістр</div>
-          <div class="rest-type">белорусская и литовская кухня</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.5</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Уютный ресторан с традиционными настойками и домашней едой.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>12:00–23:00 ежедневно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Карла Маркса 40, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Средний</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="https://www.kuhmistr.by" target="_blank">kuhmistr.by</a></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Камяніца</div>
-          <div class="rest-type">ресторан белорусской кухни</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.5</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Камин, белорусская кухня: драники, колдуны, мочанка.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>12:00–23:00 ежедневно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Первомайская 18, Минск</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>60–140 BYN на человека</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="http://kamyanitsa.by" target="_blank">kamyanitsa.by</a></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════ DAY 2: CASTLES ══════════════ -->
-  <div id="day2" class="day-panel">
-    <div class="day-header">
-      <div class="day-header-top">
-        <div>
-          <div class="day-date">11 мая, воскресенье</div>
-          <div class="day-city">📍 Несвиж + Мирский замок</div>
-          <div class="day-theme">Два замка ЮНЕСКО</div>
-        </div>
-        <div class="day-number">ДЕНЬ 2</div>
-      </div>
-      <div class="transport-badge">
-        <span class="icon">🚕</span>
-        <span>Такси из Минска (~4000 BYN) или автобус 526С от ст. м. Петровщина</span>
-      </div>
-      <div class="transport-badge" style="margin-top: 8px;">
-        <span class="icon">💡</span>
-        <span>Начать с Мирского замка (по дороге из Минска), затем Несвиж</span>
-      </div>
-    </div>
-
-    <div class="section-title">⭐ Достопримечательности</div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Мирский замок</div>
-          <div class="card-type">замок / музей / ЮНЕСКО</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-price">~17 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Замок заложен в 1520-х гг. родом Ильиничей. 5 башен, ров с водой, толщина стен до 3 м. Объект Всемирного наследия ЮНЕСКО.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>10:00–18:00 ежедневно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>пос. Мир, ул. Замковая</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Взрослые ~17 BYN</span></div>
-          <div class="meta-row"><span class="mi">💡</span><span>Приезжать пораньше, очередей почти нет</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="https://mirzamak.by" target="_blank">mirzamak.by</a></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Несвижский замок</div>
-          <div class="card-type">дворцово-парковый ансамбль / ЮНЕСКО</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-price">~18–19 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Резиденция Радзивиллов. Дворец с прудами и парком, роскошные интерьеры, портретная галерея. Объект Всемирного наследия ЮНЕСКО.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>10:00–19:00 (май–сентябрь)</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>г. Несвиж, ул. Замковая 2</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Взрослые ~18–19 BYN, аудиогид ~4 BYN</span></div>
-          <div class="meta-row"><span class="mi">⚠️</span><span style="color:#fbb56a;">Купить билеты онлайн на niasvizh.by — очереди в кассы длинные!</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="https://niasvizh.by" target="_blank">niasvizh.by</a></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-title">🍽️ Рестораны</div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Кафе в Несвижском замке</div>
-          <div class="rest-type">кафе</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-free">без брони</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Кафе в замковом комплексе. Удобно для обеда между осмотром.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>10:00–19:00</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>Территория Несвижского замка</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Недорого</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════ DAY 3: BREST ══════════════ -->
-  <div id="day3" class="day-panel">
-    <div class="day-header">
-      <div class="day-header-top">
-        <div>
-          <div class="day-date">12 мая, понедельник</div>
-          <div class="day-city">📍 Брест</div>
-          <div class="day-theme">Брестская крепость и старый город</div>
-        </div>
-        <div class="day-number">ДЕНЬ 3</div>
-      </div>
-      <div class="transport-badge">
-        <span class="icon">🚆</span>
-        <span>Поезд из Минска ~3.5–4.5 ч (06:54→10:23 или 10:25→13:55)</span>
-      </div>
-    </div>
-
-    <div class="warning-box">
-      <span class="icon">⚠️</span>
-      <div><strong>ПОНЕДЕЛЬНИК:</strong> Музей обороны, Восточный форт и 5-й форт ЗАКРЫТЫ. Открыт «Музей войны — территория мира» (выходной — вт). Территория крепости и монументы — бесплатно 24/7.</div>
-    </div>
-
-    <div class="section-title">⭐ Достопримечательности</div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Брестская крепость-герой</div>
-          <div class="card-type">мемориал / исторический комплекс</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Мемориал обороны июня–июля 1941 г. Обход территории 3–4 часа. Вечный огонь, скульптура «Жажда», монумент «Мужество».</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>08:00–24:00, вход свободный</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Героев обороны Брестской крепости, 60</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Бесплатно</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Музей войны — территория мира</div>
-          <div class="card-type">музей (открыт в пн)</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-price">~8–12 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Музей внутри крепости. <strong style="color: var(--green);">В понедельник ОТКРЫТ</strong> (выходной — вторник).</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>10:00–19:00, выходной — вторник</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>Территория Брестской крепости</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>~8–12 BYN</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="https://www.warmuseum.by" target="_blank">warmuseum.by</a></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Пешеходная ул. Советская</div>
-          <div class="card-type">прогулка</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Главная пешеходная улица Бреста. Кафе, магазины, атмосфера. Рядом — ул. Гоголя.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>Круглосуточно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Советская, Брест</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Памятник любовнику</div>
-          <div class="card-type">арт-объект</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Забавный памятник прячущемуся мужчине на подоконнике.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>Круглосуточно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Дзержинского 21, Брест</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-title">🍽️ Рестораны</div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Paragraph</div>
-          <div class="rest-type">кофейня</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.6</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Лучшая кофейня Бреста. Отличный кофе, сырники, чизкейки, круассаны. Идеально для завтрака.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>пн–пт 8:00–22:00, сб–вс 10:00–22:00</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Орловская 10, Брест</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Недорого</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="https://www.paragraph.by" target="_blank">paragraph.by</a></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Корчма «Охотничья»</div>
-          <div class="rest-type">корчма / белорусская кухня</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.3</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Уютная корчма с охотничьим интерьером. Драники, свинина с грибами.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>11:00–23:00 ежедневно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>Партизанский просп. 10а, Брест</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Средний</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">12 стульев</div>
-          <div class="rest-type">ресторан</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.5</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Живая музыка и широкое меню. Популярен среди местных.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>12:00–01:00 (пт–сб до 03:00)</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Янки Купалы 104/3, Брест</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Средний</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════ DAY 4: GRODNO ══════════════ -->
-  <div id="day4" class="day-panel">
-    <div class="day-header">
-      <div class="day-header-top">
-        <div>
-          <div class="day-date">13 мая, вторник</div>
-          <div class="day-city">📍 Гродно</div>
-          <div class="day-theme">Средневековый город, замки, Коложская церковь</div>
-        </div>
-        <div class="day-number">ДЕНЬ 4</div>
-      </div>
-      <div class="transport-badge">
-        <span class="icon">🚌</span>
-        <span>Автобус из Бреста прямой ~4 ч (отправление ~09:00)</span>
-      </div>
-      <div class="transport-badge" style="margin-top: 8px;">
-        <span class="icon">🚆</span>
-        <span>Гродно → Москва: прямой поезд или через Минск (14 мая)</span>
-      </div>
-    </div>
-
-    <div class="section-title">⭐ Достопримечательности</div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Ул. Элизы Ожешко</div>
-          <div class="card-type">прогулка</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Главная улица старого Гродно. Вечный огонь, дворец вице-губернатора Максимовича, дом купца Муравьёва.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>Круглосуточно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Элизы Ожешко, Гродно</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Костёл Св. Франциска Ксаверия</div>
-          <div class="card-type">религиозный объект / барокко</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Один из лучших образцов барокко в Беларуси. Главная католическая святыня Гродно, XVII в.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>9:00–18:00</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>пл. Советская, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Бесплатно</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Старый замок</div>
-          <div class="card-type">замок / музей</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-price">~10 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Первое укрепление Гродно на берегу Немана. Историко-археологический музей. Вид на реку. <strong style="color: var(--green);">Вторник — открыт (выходной — пн).</strong></div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>10:00–17:00, выходной — пн</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Замковая 21, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>~10 BYN</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Новый замок</div>
-          <div class="card-type">замок / музей</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-price">~10 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Дворец польских королей XVIII в. Рядом со Старым замком.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>10:00–18:00</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Замковая 20, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>~10 BYN</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Коложская церковь</div>
-          <div class="card-type">архитектурная жемчужина · ~1180 г.</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-must">⭐ маст-си</span>
-          <span class="badge badge-free">бесплатно</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Построена около 1180 года — один из старейших храмов Восточной Европы. Часть стены заменена деревом после оползня XIX в. Стены украшены цветными валунами и майоликовыми крестами. Коложский парк с панорамой на Неман.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>10:00–18:00</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Коложа 6, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Бесплатно (пожертвование)</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Музей истории религии</div>
-          <div class="card-type">музей</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-price">~8 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Коллекция религиозных артефактов от древности до современности.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>вт–сб 10:00–18:00</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Замковая 16, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>~8 BYN</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="toggleCard(this)">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Гродненский зоопарк</div>
-          <div class="card-type">зоопарк</div>
-        </div>
-        <div class="card-badges">
-          <span class="badge badge-price">~12 BYN</span>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Один из лучших зоопарков Беларуси, в центре города рядом с вокзалом.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>9:00–18:00 ежедневно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Тимирязева 11, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Взрослые ~12 BYN</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-title">🍽️ Рестораны</div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Беласток</div>
-          <div class="rest-type">ресторан белорусской кухни</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.5</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Шикарный интерьер, классические драники, мочанка, верещака, настойки. Одно из лучших мест белорусской кухни в Гродно.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>12:00–23:00 (пт–сб до 00:00)</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>Виленская ул. 2, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Средний</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="https://www.instagram.com/belastok.grodno/" target="_blank">instagram</a></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Королевская охота</div>
-          <div class="rest-type">ресторан</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.5</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Охотничий интерьер. Лосиное мясо, жульен из фазана, стейки. Атмосферно.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>12:00–22:00 (пт–сб до 00:00)</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Элизы Ожешко 3, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>Средний</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Ресторан Бакст</div>
-          <div class="rest-type">ресторан (у замков)</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.4</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">У Старого замка. Стейки, шоколадный фондан, лазанья. Удобно совместить с осмотром замков.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>12:00–00:00 (пт–сб до 01:30)</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Замковая 21, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>100–120 BYN на человека</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-          <div class="meta-row"><span class="mi">🔗</span><a href="http://bakst.by" target="_blank">bakst.by</a></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="rest-card card" onclick="toggleCard(this)">
-      <div class="rest-card-header card-header">
-        <div>
-          <div class="rest-name">Пешков</div>
-          <div class="rest-type">ресторан европейской кухни</div>
-        </div>
-        <div class="card-badges">
-          <div class="rest-rating"><span>★</span>4.5</div>
-          <span class="card-chevron">▾</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-desc">Каре барашка, стейк из лосося, завтраки с 7:30.</div>
-        <div class="card-meta">
-          <div class="meta-row"><span class="mi">🕐</span><span>7:30–00:00 ежедневно</span></div>
-          <div class="meta-row"><span class="mi">📍</span><span>ул. Максима Горького 27, Гродно</span></div>
-          <div class="meta-row"><span class="mi">💰</span><span>20–80 BYN на человека</span></div>
-          <div class="meta-row"><span class="mi">📅</span><span class="booking-chip">📋 нужна бронь</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════ PRACTICAL INFO ══════════════ -->
-  <div id="info" class="day-panel">
-    <div class="info-section">
-      <h3>💳 Деньги</h3>
-      <div class="info-row">
-        <span class="label">Валюта</span>
-        <span>Белорусский рубль (BYN)</span>
-      </div>
-      <div class="info-row">
-        <span class="label">Карты</span>
-        <span>Карты Мир принимаются повсеместно</span>
-      </div>
-    </div>
-
-    <div class="info-section">
-      <h3>🚆 Транспорт</h3>
-      <div class="info-row">
-        <span class="label">Минск → Брест</span>
-        <span>Поезд БЖД: ~3.5–4.5 ч, <a href="https://rw.by" target="_blank" style="color:var(--accent)">rw.by</a></span>
-      </div>
-      <div class="info-row">
-        <span class="label">Брест → Гродно</span>
-        <span>Автобус прямой: ~4 ч. Поезд с пересадкой ~12 ч — не рекомендуется</span>
-      </div>
-      <div class="info-row">
-        <span class="label">Гродно → Москва</span>
-        <span>Прямой поезд или через Минск (14 мая)</span>
-      </div>
-      <div class="info-row">
-        <span class="label">Замки Мир/Несвиж</span>
-        <span>Такси из Минска (~4000 BYN) или автобус 526С от ст. м. Петровщина</span>
-      </div>
-    </div>
-
-    <div class="info-section">
-      <h3>⚠️ Важные предупреждения</h3>
-      <div class="warn-item">
-        <span class="icon">🔴</span>
-        <div><strong>12 мая (пн, Брест):</strong> Музей обороны, Восточный форт, 5-й форт — ЗАКРЫТЫ. Территория и монументы — бесплатно 24/7.</div>
-      </div>
-      <div class="warn-item">
-        <span class="icon">🟡</span>
-        <div><strong>11 мая (вс, Несвиж):</strong> Всё открыто. Билеты онлайн на <a href="https://niasvizh.by" target="_blank" style="color:var(--accent);">niasvizh.by</a>.</div>
-      </div>
-      <div class="warn-item">
-        <span class="icon">🟡</span>
-        <div><strong>5-й форт в Бресте:</strong> Нужна предварительная запись, тел. <a href="tel:+375333265095" style="color:var(--accent);">+375 (33) 326-50-95</a></div>
-      </div>
-    </div>
-
-    <div class="info-section">
-      <h3>📝 Заметки</h3>
-      <div class="notes-list">
-        <div class="note-item">Валюта: белорусский рубль (BYN). Карты Мир принимаются везде.</div>
-        <div class="note-item">Погода в мае: +15–20°C, возможны дожди — взять куртку.</div>
-        <div class="note-item">Билеты на поезда: <a href="https://rw.by" target="_blank" style="color:var(--accent);">rw.by</a>. Замки ЮНЕСКО лучше бронировать онлайн заранее.</div>
-        <div class="note-item">14 мая — возврат в Москву.</div>
-      </div>
-    </div>
-
-    <!-- Quick calendar overview -->
-    <div class="info-section">
-      <h3>📅 Даты и города</h3>
-      <div class="info-row">
-        <span class="label">10 мая, сб</span>
-        <span>Минск</span>
-      </div>
-      <div class="info-row">
-        <span class="label">11 мая, вс</span>
-        <span>Мир + Несвиж (два замка ЮНЕСКО)</span>
-      </div>
-      <div class="info-row">
-        <span class="label">12 мая, пн</span>
-        <span>Брест (Брестская крепость)</span>
-      </div>
-      <div class="info-row">
-        <span class="label">13 мая, вт</span>
-        <span>Гродно</span>
-      </div>
-      <div class="info-row">
-        <span class="label">14 мая, ср</span>
-        <span>🏠 Возврат в Москву</span>
-      </div>
-    </div>
-  </div>
-
-</main>
-
-<div class="footer">
-  Беларусь · 10–13 мая 2026
+<div id="app">
+  <div class="loading">Загрузка…</div>
 </div>
 
 <script>
-  function showDay(id) {
-    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    event.currentTarget.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+const DAY_EMOJIS = ['🏙️','🏰','🏛️','⛪'];
+const CITY_EMOJIS = { 'Минск':'🏙️', 'Несвиж + Мирский замок':'🏰', 'Брест':'🏛️', 'Гродно':'⛪' };
 
-  function toggleCard(card) {
-    card.classList.toggle('open');
-  }
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function badge(cls, text) {
+  return `<span class="badge ${cls}">${text}</span>`;
+}
+
+function priceBadge(price) {
+  if (!price) return '';
+  const p = price.toLowerCase();
+  if (p === 'бесплатно') return badge('b-free', 'бесплатно');
+  return badge('b-price', esc(price));
+}
+
+function renderMeta(rows) {
+  return `<div class="meta">${rows.filter(Boolean).join('')}</div>`;
+}
+
+function metaRow(icon, content) {
+  if (!content) return '';
+  return `<div class="meta-row"><span class="ic">${icon}</span><span>${content}</span></div>`;
+}
+
+function mapsBtn(url) {
+  if (!url) return '';
+  return `<a class="maps-btn" href="${esc(url)}" target="_blank">🗺️ Открыть в Maps</a>`;
+}
+
+function renderWarnings(warnings) {
+  if (!warnings?.length) return '';
+  return `<div class="warn-box"><ul>${warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>`;
+}
+
+function renderSight(s) {
+  const isFree = (s.price ?? '').toLowerCase() === 'бесплатно';
+  return `
+  <div class="card" onclick="toggle(this)">
+    <div class="card-head">
+      <div>
+        <div class="card-name">${esc(s.name)}</div>
+        <div class="card-sub">${esc(s.type)}</div>
+      </div>
+      <div class="badges">
+        ${s.must_see ? badge('b-must','⭐ маст-си') : ''}
+        ${s.warning ? badge('b-closed','⚠️ закрыто') : ''}
+        ${priceBadge(s.price)}
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">${esc(s.description)}</div>
+      ${renderMeta([
+        metaRow('🕐', s.hours),
+        metaRow('📍', s.address),
+        metaRow('💰', s.price),
+        s.booking_tip ? metaRow('💡', s.booking_tip) : '',
+        s.warning    ? `<div class="meta-row"><span class="ic">⚠️</span><span style="color:#fca5a5">${esc(s.warning)}</span></div>` : '',
+        s.url        ? metaRow('🔗', `<a href="${esc(s.url)}" target="_blank">${esc(s.url.replace(/https?:\/\//,''))}</a>`) : '',
+      ])}
+      ${mapsBtn(s.maps_url)}
+    </div>
+  </div>`;
+}
+
+function renderRestaurant(r) {
+  const ratingHtml = r.rating ? `<div class="rating">★ ${r.rating}</div>` : '';
+  return `
+  <div class="card" onclick="toggle(this)">
+    <div class="card-head">
+      <div>
+        <div class="card-name">${esc(r.name)}</div>
+        <div class="card-sub">${esc(r.type)}</div>
+      </div>
+      <div class="badges">
+        ${r.is_breakfast ? badge('b-bfast','☀️ завтрак') : ''}
+        ${r.booking ? badge('b-book','📋 бронь') : ''}
+        ${ratingHtml}
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">${esc(r.description)}</div>
+      ${renderMeta([
+        metaRow('🕐', r.hours),
+        metaRow('📍', r.address),
+        metaRow('💰', r.price_range),
+        r.url ? metaRow('🔗', `<a href="${esc(r.url)}" target="_blank">${esc(r.url.replace(/https?:\/\//,''))}</a>`) : '',
+      ])}
+      ${mapsBtn(r.maps_url)}
+    </div>
+  </div>`;
+}
+
+function renderDay(day, idx) {
+  const emoji = DAY_EMOJIS[idx] ?? '📍';
+  const transportLines = [
+    day.transport_in  ? `<div class="transport"><span>🚆</span><span>${esc(day.transport_in)}</span></div>` : '',
+    day.transport_out ? `<div class="transport"><span>🏠</span><span>${esc(day.transport_out)}</span></div>` : '',
+    day.transport_tip ? `<div class="transport"><span>💡</span><span>${esc(day.transport_tip)}</span></div>` : '',
+  ].filter(Boolean).join('');
+
+  return `
+  <div class="day-head">
+    <div class="day-head-row">
+      <div>
+        <div class="day-date">${esc(day.date)}</div>
+        <div class="day-city">${emoji} ${esc(day.city)}</div>
+        <div class="day-theme">${esc(day.theme)}</div>
+      </div>
+      <div class="day-badge">ДЕНЬ ${day.day}</div>
+    </div>
+    ${transportLines}
+  </div>
+  ${renderWarnings(day.day_warnings)}
+  <div class="sec">⭐ Достопримечательности</div>
+  ${(day.sights ?? []).map(renderSight).join('')}
+  <div class="sec">🍽️ Рестораны и кафе</div>
+  ${(day.restaurants ?? []).map(renderRestaurant).join('')}`;
+}
+
+function renderPractical(data) {
+  const p = data.practical;
+  const t = p.transport;
+  const calRows = Object.entries(p.calendar ?? {}).map(([k, v]) => {
+    const date = k.replace('_may', ' мая').replace('_', ' ');
+    return `<div class="info-row"><span class="lbl">${date.trim()}</span><span>${esc(v)}</span></div>`;
+  }).join('');
+
+  return `
+  <div class="info-card">
+    <h3>💳 Деньги</h3>
+    <div class="info-row"><span class="lbl">Валюта</span><span>${esc(p.currency)}</span></div>
+    <div class="info-row"><span class="lbl">Карты</span><span>${esc(p.currency_note)}</span></div>
+  </div>
+  <div class="info-card">
+    <h3>🚆 Транспорт</h3>
+    <div class="info-row"><span class="lbl">Минск → Брест</span><span>${esc(t.minsk_to_brest)} (<a href="https://rw.by" target="_blank" style="color:var(--accent)">rw.by</a>)</span></div>
+    <div class="info-row"><span class="lbl">Брест → Гродно</span><span>${esc(t.brest_to_grodno)}</span></div>
+    <div class="info-row"><span class="lbl">Гродно → Москва</span><span>${esc(t.grodno_to_moscow)}</span></div>
+  </div>
+  <div class="info-card">
+    <h3>⚠️ Важные предупреждения</h3>
+    ${(p.warnings ?? []).map(w => `<div class="warn-li"><span>⚠️</span><span>${esc(w)}</span></div>`).join('')}
+  </div>
+  <div class="info-card">
+    <h3>📅 Даты</h3>
+    ${calRows}
+  </div>
+  <div class="info-card">
+    <h3>📝 Заметки</h3>
+    ${(data.trip.notes ?? []).map(n => `<div class="note-li">${esc(n)}</div>`).join('')}
+  </div>`;
+}
+
+function renderRoute(days) {
+  const cities = days.map(d => d.city.split(' + ')[0].split(' ')[0]);
+  return cities.map((c, i) => `
+    <div class="route-city">
+      <div class="route-dot"></div>
+      <div class="route-name">${esc(c)}</div>
+    </div>
+    ${i < cities.length - 1 ? '<div class="route-line"></div>' : '<div class="route-line"></div>'}
+  `).join('') + `
+  <div class="route-city">
+    <div class="route-dot end"></div>
+    <div class="route-name">🏠 Москва</div>
+  </div>`;
+}
+
+function buildTabs(days) {
+  return days.map((d, i) => {
+    const cityShort = d.city.split(' ')[0];
+    const dateShort = d.date.split(',')[0];
+    return `<button class="tab${i===0?' active':''}" onclick="showPanel('day${i}', this)">${dateShort} · ${cityShort}</button>`;
+  }).join('') + `<button class="tab info" onclick="showPanel('info', this)">ℹ️ Инфо</button>`;
+}
+
+function render(data) {
+  const days = data.days;
+
+  const panels = days.map((d, i) => `
+    <div id="day${i}" class="panel${i===0?' active':''}">
+      ${renderDay(d, i)}
+    </div>
+  `).join('') + `
+  <div id="info" class="panel">
+    ${renderPractical(data)}
+  </div>`;
+
+  document.getElementById('app').innerHTML = `
+  <header class="header">
+    <div class="header-top">
+      <span style="font-size:28px">🇧🇾</span>
+      <div>
+        <h1>${esc(data.trip.title)}</h1>
+        <p>${esc(data.trip.description)}</p>
+      </div>
+    </div>
+    <div class="route-strip">${renderRoute(days)}</div>
+    <div class="tabs">${buildTabs(days)}</div>
+  </header>
+  <main>${panels}</main>
+  <footer>${esc(data.trip.dates)}</footer>`;
+}
+
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggle(card) {
+  card.classList.toggle('open');
+}
+
+fetch('data.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(render)
+  .catch(e => {
+    document.getElementById('app').innerHTML =
+      `<div class="loading" style="flex-direction:column;gap:8px">
+        <span style="font-size:32px">⚠️</span>
+        <span>Не удалось загрузить data.json</span>
+        <span style="font-size:12px;color:var(--text2)">${esc(e.message)}</span>
+      </div>`;
+  });
 </script>
 </body>
 </html>
