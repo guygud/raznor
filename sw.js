@@ -1,4 +1,4 @@
-const CACHE = 'by2026-v3'; // bumped to force old SW replacement
+const CACHE = 'by2026-v4'; // bumped to force old SW replacement
 const ASSETS = ['./', './index.html', './data.json', './stories.json'];
 
 self.addEventListener('install', e => {
