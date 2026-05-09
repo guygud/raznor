@@ -243,9 +243,14 @@ function metaRow(icon, content) {
   return `<div class="meta-row"><span class="ic">${icon}</span><span>${content}</span></div>`;
 }
 
-function mapsBtn(url) {
-  if (!url) return '';
-  return `<a class="maps-btn" href="${esc(url)}" target="_blank">🗺️ Открыть в Maps</a>`;
+function mapsBtn(geo) {
+  if (!geo) return '';
+  const google = `https://maps.google.com/?q=${geo.lat},${geo.lng}`;
+  const yandex = `https://yandex.ru/maps/?pt=${geo.lng},${geo.lat}&z=17`;
+  return `<div style="display:flex;gap:7px;margin-top:10px">
+    <a class="maps-btn" href="${google}" target="_blank">🗺️ Google</a>
+    <a class="maps-btn" href="${yandex}" target="_blank">🗺️ Яндекс</a>
+  </div>`;
 }
 
 function renderWarnings(warnings) {
@@ -279,7 +284,7 @@ function renderSight(s) {
         s.warning    ? `<div class="meta-row"><span class="ic">⚠️</span><span style="color:#fca5a5">${esc(s.warning)}</span></div>` : '',
         s.url        ? metaRow('🔗', `<a href="${esc(s.url)}" target="_blank">${esc(s.url.replace(/https?:\/\//,''))}</a>`) : '',
       ])}
-      ${mapsBtn(s.maps_url)}
+      ${mapsBtn(s.geo)}
     </div>
   </div>`;
 }
@@ -308,7 +313,7 @@ function renderRestaurant(r) {
         metaRow('💰', r.price_range),
         r.url ? metaRow('🔗', `<a href="${esc(r.url)}" target="_blank">${esc(r.url.replace(/https?:\/\//,''))}</a>`) : '',
       ])}
-      ${mapsBtn(r.maps_url)}
+      ${mapsBtn(r.geo)}
     </div>
   </div>`;
 }
