@@ -1,5 +1,5 @@
 const CACHE = 'by2026-v1';
-const ASSETS = ['./', './index.html', './data.json'];
+const ASSETS = ['./', './index.html', './data.json', './stories.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

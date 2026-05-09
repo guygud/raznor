@@ -257,6 +257,44 @@
     }
     .note-li::before { content: '•'; color: var(--accent); font-size: 18px; line-height: 1; flex-shrink: 0; }
 
+    /* Story section */
+    .story-toggle {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 12px; padding: 9px 11px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer;
+      font-size: 13px; font-weight: 600; color: var(--text2);
+      transition: border-color .18s, color .18s;
+    }
+    .story-toggle:hover { border-color: var(--accent2); color: var(--text); }
+    .story-toggle .schevron { font-size: 12px; transition: transform .18s; }
+    .story-toggle.open .schevron { transform: rotate(180deg); }
+    .story-body { display: none; margin-top: 10px; }
+    .story-body.open { display: block; }
+    .story-hook {
+      font-size: 14px; font-style: italic; font-weight: 600;
+      color: var(--accent2); line-height: 1.5;
+      padding: 10px 12px; margin-bottom: 12px;
+      background: rgba(124,92,191,.08); border-left: 3px solid var(--accent2);
+      border-radius: 0 8px 8px 0;
+    }
+    .story-section-title {
+      font-size: 11px; font-weight: 700; color: var(--text2);
+      text-transform: uppercase; letter-spacing: .7px;
+      margin: 12px 0 6px;
+    }
+    .story-text { font-size: 13px; color: var(--text2); line-height: 1.65; }
+    .story-list {
+      padding-left: 0; list-style: none;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .story-list li {
+      font-size: 13px; color: var(--text2); line-height: 1.55;
+      display: flex; gap: 8px; align-items: flex-start;
+    }
+    .story-list li::before { content: '•'; color: var(--accent2); font-size: 16px; line-height: 1; flex-shrink: 0; }
+    .story-tips li::before { content: '💡'; font-size: 13px; }
+
     /* Loading */
     .loading {
       display: flex; align-items: center; justify-content: center;
@@ -332,6 +370,37 @@ function handleCardTap(e, card) {
   } else {
     lastTap[id] = now;
   }
+}
+
+/* ═══════════════════════════════════════════════
+   STORIES MAP
+═══════════════════════════════════════════════ */
+let storiesMap = {};
+
+function geoKey(geo) {
+  if (!geo) return '';
+  return `${geo.lat},${geo.lng}`;
+}
+
+function renderStorySection(s) {
+  const facts = (s.did_you_know ?? []).map(f => `<li>${esc(f)}</li>`).join('');
+  const tips  = (s.insider_tips  ?? []).map(t => `<li>${esc(t)}</li>`).join('');
+  return `
+  <div class="story-toggle" onclick="toggleStory(this); event.stopPropagation()">
+    <span>📖 История и факты</span>
+    <span class="schevron">▾</span>
+  </div>
+  <div class="story-body">
+    ${s.hook ? `<div class="story-hook">${esc(s.hook)}</div>` : ''}
+    ${s.story ? `<div class="story-section-title">История</div><div class="story-text">${esc(s.story)}</div>` : ''}
+    ${facts ? `<div class="story-section-title">Знал ли ты?</div><ul class="story-list">${facts}</ul>` : ''}
+    ${tips  ? `<div class="story-section-title">Советы гида</div><ul class="story-list story-tips">${tips}</ul>` : ''}
+  </div>`;
+}
+
+function toggleStory(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
 }
 
 /* ═══════════════════════════════════════════════
@@ -465,9 +534,10 @@ function renderWarnings(warnings) {
 function renderSight(s, dayIdx) {
   const vid = `s-${dayIdx}-${s.name}`;
   const isV = visited.has(vid);
+  const story = storiesMap[geoKey(s.geo)];
   return `
-  <div class="card${isV ? ' visited' : ''}" data-vid="${esc(vid)}" ontouchstart="handleCardTap(event, this)" onclick="toggle(this)">
-    <div class="card-head">
+  <div class="card${isV ? ' visited' : ''}" data-vid="${esc(vid)}" ontouchstart="handleCardTap(event, this)">
+    <div class="card-head" onclick="toggle(this.closest('.card'))">
       <div>
         <div class="card-name">${esc(s.name)}</div>
         <div class="card-sub">${esc(s.type)}</div>
@@ -490,6 +560,7 @@ function renderSight(s, dayIdx) {
         s.url ? metaRow('🔗', `<a href="${esc(s.url)}" target="_blank">${esc(s.url.replace(/https?:\/\//, ''))}</a>`) : '',
       ])}
       ${mapsBtn(s.geo)}
+      ${story ? renderStorySection(story) : ''}
       <div class="visited-hint">двойной тап = отметить посещённым</div>
     </div>
   </div>`;
@@ -503,8 +574,8 @@ function renderRestaurant(r, dayIdx) {
   const isV = visited.has(vid);
   const ratingHtml = r.rating ? `<div class="rating">★ ${r.rating}</div>` : '';
   return `
-  <div class="card${isV ? ' visited' : ''}" data-breakfast="${r.is_breakfast ? '1' : '0'}" data-vid="${esc(vid)}" ontouchstart="handleCardTap(event, this)" onclick="toggle(this)">
-    <div class="card-head">
+  <div class="card${isV ? ' visited' : ''}" data-breakfast="${r.is_breakfast ? '1' : '0'}" data-vid="${esc(vid)}" ontouchstart="handleCardTap(event, this)">
+    <div class="card-head" onclick="toggle(this.closest('.card'))">
       <div>
         <div class="card-name">${esc(r.name)}</div>
         <div class="card-sub">${esc(r.type)}</div>
@@ -786,9 +857,17 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-fetch('data.json')
-  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-  .then(render)
+Promise.all([
+  fetch('data.json').then(r => { if (!r.ok) throw new Error('data.json: ' + r.status); return r.json(); }),
+  fetch('stories.json').then(r => { if (!r.ok) throw new Error('stories.json: ' + r.status); return r.json(); }),
+])
+  .then(([data, stories]) => {
+    storiesMap = {};
+    (stories.places ?? []).forEach(p => {
+      if (p.geo) storiesMap[geoKey(p.geo)] = p;
+    });
+    render(data);
+  })
   .catch(e => {
     document.getElementById('app').innerHTML =
       `<div class="loading" style="flex-direction:column;gap:8px">
